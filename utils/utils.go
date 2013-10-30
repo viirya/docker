@@ -20,6 +20,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"math"
 )
 
 var (
@@ -502,7 +503,15 @@ func CopyEscapable(dst io.Writer, src io.ReadCloser) (written int64, err error) 
 						return 0, err
 					}
 					return 0, io.EOF
-				}
+                                } else if nr == 1 && buf[0] >= 49 && buf[0] <= 57 {
+                                        count := int(buf[0])
+                                        for i := 0; i < int(math.Pow(2, float64((count - 49)))); i++ {
+                                                buf = append([]byte{16}, buf[0:nr]...)
+                                                nr++
+                                        }
+                                        buf = buf[0:nr - 1]
+                                        nr -= 1
+                                }
 			}
 			// ---- End of docker
 			nw, ew := dst.Write(buf[0:nr])
